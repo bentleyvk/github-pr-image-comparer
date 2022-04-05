@@ -215,7 +215,7 @@
     const options = await window.chrome.storage.sync.get("options");
     return options.options;
   };
-  var onCompareButtonClick = async (file, baseCommitId, endCommitId, organization2, repo2) => {
+  var onCompareButtonClick = async (file, baseCommitId, endCommitId, organization2, repo2, threshold) => {
     const renderWrapper = file.querySelector(".render-wrapper");
     renderWrapper.innerHTML = "";
     const renderContainer = document.createElement("div");
@@ -249,7 +249,7 @@
     diffCanvas.style.cursor = "pointer";
     const diffContext = diffCanvas.getContext("2d");
     const diff = diffContext.createImageData(width, height);
-    (0, import_pixelmatch.default)(oldImg.data, newImg.data, diff.data, width, height, { threshold: 0.1 });
+    (0, import_pixelmatch.default)(oldImg.data, newImg.data, diff.data, width, height, { threshold });
     diffContext.putImageData(diff, 0, 0);
     addDialogToCanvas(diffCanvas, width, height, "#d0d7de", renderContainer);
     renderContainer.appendChild(diffCanvas);
@@ -326,15 +326,16 @@
       comparerButton.innerHTML = `<button class="img-comparer btn btn-sm BtnGroup-item tooltipped tooltipped-w rendered js-rendered" aria-label="Display image diff with Pixelmatch" data-disable-with="" aria-current="false">
   <svg class="octicon octicon-file" style="width: 16px; height: 16px;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M426.666667 128H213.333333c-47.146667 0-85.333333 38.186667-85.333333 85.333333v597.333334c0 47.146667 38.186667 85.333333 85.333333 85.333333h213.333334v85.333333h85.333333V42.666667h-85.333333v85.333333z m0 640H213.333333l213.333334-256v256zM810.666667 128H597.333333v85.333333h213.333334v554.666667L597.333333 512v384h213.333334c47.146667 0 85.333333-38.186667 85.333333-85.333333V213.333333c0-47.146667-38.186667-85.333333-85.333333-85.333333z"  /></svg>
   </button>`;
-      comparerButton.addEventListener("click", () => onCompareButtonClick(file, baseCommitId, endCommitId, organization2, repo2));
+      comparerButton.addEventListener("click", () => onCompareButtonClick(file, baseCommitId, endCommitId, organization2, repo2, extensionOptions.threshold));
       buttonGroup.appendChild(comparerButton);
       if (extensionOptions.isDefaultView) {
-        comparerButton.click();
         const activeViewButton = buttonGroup.querySelector(".selected");
         activeViewButton.classList.remove("selected");
         activeViewButton.ariaCurrent = "false";
-        comparerButton.querySelector(".img-comparer").classList.add("selected");
-        comparerButton.querySelector(".img-comparer").ariaCurrent = "true";
+        const imgComparerButton = buttonGroup.querySelector(".img-comparer");
+        imgComparerButton.classList.add("selected");
+        imgComparerButton.ariaCurrent = "true";
+        onCompareButtonClick(file, baseCommitId, endCommitId, organization2, repo2, extensionOptions.threshold);
       }
     });
   };

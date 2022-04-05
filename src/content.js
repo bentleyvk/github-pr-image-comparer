@@ -27,7 +27,7 @@ const getExtensionOptions = async () => {
   return options.options;
 };
 
-const onCompareButtonClick = async (file, baseCommitId, endCommitId, organization, repo) => {
+const onCompareButtonClick = async (file, baseCommitId, endCommitId, organization, repo, threshold) => {
   const renderWrapper = file.querySelector(".render-wrapper");
   renderWrapper.innerHTML = "";
   const renderContainer = document.createElement("div");
@@ -66,7 +66,7 @@ const onCompareButtonClick = async (file, baseCommitId, endCommitId, organizatio
   diffCanvas.style.cursor = "pointer";
   const diffContext = diffCanvas.getContext("2d");
   const diff = diffContext.createImageData(width, height);
-  pixelmatch(oldImg.data, newImg.data, diff.data, width, height, { threshold: 0.1 });
+  pixelmatch(oldImg.data, newImg.data, diff.data, width, height, { threshold });
   diffContext.putImageData(diff, 0, 0);
   addDialogToCanvas(diffCanvas, width, height, "#d0d7de", renderContainer);
   renderContainer.appendChild(diffCanvas);
@@ -176,64 +176,19 @@ const start = async () => {
   </button>`;
 
     comparerButton.addEventListener("click", () =>
-      onCompareButtonClick(file, baseCommitId, endCommitId, organization, repo)
+      onCompareButtonClick(file, baseCommitId, endCommitId, organization, repo, extensionOptions.threshold)
     );
-
-    /*comparerButton.addEventListener("click", async () => {
-      const renderWrapper = file.querySelector(".render-wrapper");
-      renderWrapper.innerHTML = "";
-      const renderContainer = document.createElement("div");
-      renderContainer.classList.add("render-wrapper");
-      renderWrapper.appendChild(renderContainer);
-
-      // const renderContainer = file.querySelector(".render-container");
-      renderContainer.style.height = "auto";
-      renderContainer.style.display = "flex";
-      renderContainer.style.flexWrap = "wrap";
-      renderContainer.style.justifyContent = "center";
-      renderContainer.style.gap = "16px";
-      renderContainer.style.padding = "16px";
-      renderContainer.style.backgroundColor = "#f6f8fa";
-
-      const filePath = file.dataset.tagsearchPath;
-      const oldImage = await getImg(filePath, organization, repo, baseCommitId);
-      const newImage = await getImg(filePath, organization, repo, endCommitId);
-      const width = Math.max(oldImage.width, newImage.width);
-      const height = Math.max(oldImage.height, newImage.height);
-      const oldImgCanvas = createImgCanvas2(oldImage, width, height, "#cf222e", renderContainer);
-      const newImgCanvas = createImgCanvas2(newImage, width, height, "#2da44e", renderContainer);
-      renderContainer.appendChild(oldImgCanvas);
-      renderContainer.appendChild(newImgCanvas);
-
-      console.log(oldImgCanvas.width, oldImgCanvas.height);
-
-      const oldImg = oldImgCanvas.getContext("2d").getImageData(0, 0, oldImgCanvas.width, oldImgCanvas.height);
-      const newImg = newImgCanvas.getContext("2d").getImageData(0, 0, newImgCanvas.width, newImgCanvas.height);
-      const diffCanvas = document.createElement("canvas");
-      diffCanvas.style.border = "1px solid #d0d7de";
-      diffCanvas.style.flexShrink = "0";
-      diffCanvas.style.maxWidth = "30%";
-      diffCanvas.width = width;
-      diffCanvas.height = height;
-      diffCanvas.style.cursor = "pointer";
-      const diffContext = diffCanvas.getContext("2d");
-      const diff = diffContext.createImageData(width, height);
-      pixelmatch(oldImg.data, newImg.data, diff.data, width, height, { threshold: 0.1 });
-      diffContext.putImageData(diff, 0, 0);
-      addDialogToCanvas(diffCanvas, width, height, "#d0d7de", renderContainer);
-      renderContainer.appendChild(diffCanvas);
-    });*/
 
     buttonGroup.appendChild(comparerButton);
 
     if (extensionOptions.isDefaultView) {
-      comparerButton.click();
       const activeViewButton = buttonGroup.querySelector(".selected");
       activeViewButton.classList.remove("selected");
       activeViewButton.ariaCurrent = "false";
-      comparerButton.querySelector(".img-comparer").classList.add("selected");
-      comparerButton.querySelector(".img-comparer").ariaCurrent = "true";
-      // onCompareButtonClick(file, baseCommitId, endCommitId, organization, repo);
+      const imgComparerButton = buttonGroup.querySelector(".img-comparer");
+      imgComparerButton.classList.add("selected");
+      imgComparerButton.ariaCurrent = "true";
+      onCompareButtonClick(file, baseCommitId, endCommitId, organization, repo, extensionOptions.threshold);
     }
   });
 };

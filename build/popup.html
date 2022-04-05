@@ -1,19 +1,51 @@
 <!-- popup.html -->
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    html {
-      min-width: 150px;
-      padding: 12px;
-    }
-  </style>
-<script defer src="popup.js"></script>
-</head>
-<body>
-  <label>
-    <input type="checkbox" id="isDefaultView" />
-    Default View
-  </label>
-</body>
+  <head>
+    <style>
+      body {
+        min-width: 230px;
+        padding: 12px;
+        margin: 0;
+      }
+      header {
+        margin: -12px -12px 12px -12px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background-color: #cbecff;
+      }
+      .content {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      input[type="checkbox"] {
+        margin: 0;
+      }
+    </style>
+    <script defer src="popup.js"></script>
+  </head>
+  <body>
+    <header>
+      <img src="/icons/16x16.png" style="width: 16px; height: 16px" alt="" />
+      <span>GitHub PR images comparer settings</span>
+    </header>
+    <div class="content">
+      <label>
+        <input type="checkbox" id="isDefaultView" />
+        <span>Make as default comparer</span>
+      </label>
+      <label>
+        <span>Threshold:</span>
+        <input type="number" id="threshold" style="width: 8ch" min="0" max="1" step="0.1"/>
+      </label>
+    </div>
+  </body>
 </html>
