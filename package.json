@@ -1,0 +1,19 @@
+{
+  "name": "github-pr-image-compare",
+  "version": "0.1.0",
+  "description": "",
+  "main": "content.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild src/content.js --bundle --outfile=build/content.js",
+    "build:watch": "esbuild src/content.js --bundle --outfile=build/content.js --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pixelmatch": "^5.2.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.27"
+  }
+}

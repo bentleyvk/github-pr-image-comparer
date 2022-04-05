@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+ 
+  "name": "Github PR image comparer",
+  "version": "0.1.0",
+  "description": "Lateral blog post demo extension",
+ 
+  "permissions": [
+		"storage",
+		"contextMenus",
+		"activeTab",
+		"alarms"
+	],
+	"host_permissions": [
+		"https://github.com/*",
+		"https://api.github.com/*"],
+  "content_scripts": [{
+    "matches": [
+      "https://github.com/*/*/pull/*/files",
+      "https://gist.github.com/*/*/pull/*/files"
+    ],
+    "js": ["content.js"]
+  }]
+ 
+}
