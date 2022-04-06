@@ -1,0 +1,38 @@
+.ghpric-render-container {
+  height: auto;
+  display: flex;
+  /* flex-wrap: wrap; */
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f6f8fa;
+}
+
+.ghpric-canvas {
+  flex-shrink: 0;
+  max-width: 30%;
+  cursor: pointer;
+}
+
+.ghpric-dialog-before,
+.ghpric-canvas-before {
+  border: 1px solid #cf222e;
+}
+
+.ghpric-dialog-after,
+.ghpric-canvas-after {
+  border: 1px solid #2da44e;
+}
+
+.ghpric-dialog-diff,
+.ghpric-canvas-diff {
+  border: 1px solid #d0d7de;
+}
+
+.ghpric-dialog {
+  padding: 0;
+}
+
+.ghpric-dialog-canvas {
+  max-width: 90vw;
+}
