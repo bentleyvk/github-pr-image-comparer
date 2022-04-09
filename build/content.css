@@ -14,25 +14,58 @@
   cursor: pointer;
 }
 
-.ghpric-dialog-before,
 .ghpric-canvas-before {
   border: 1px solid #cf222e;
 }
 
-.ghpric-dialog-after,
 .ghpric-canvas-after {
   border: 1px solid #2da44e;
 }
 
-.ghpric-dialog-diff,
 .ghpric-canvas-diff {
   border: 1px solid #d0d7de;
 }
 
 .ghpric-dialog {
+  border: none;
   padding: 0;
+  background-color: #f6f8fa;
+  box-shadow: 0 9px 46px rgb(0 0 0 / 25%);
+  border-radius: 3px;
+}
+
+.ghpric-dialog-content {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.ghpric-img-selector {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 16px 16px 16px;
+}
+
+.ghpric-img-selector > img {
+  max-width: 25%;
+  cursor: pointer;
 }
 
 .ghpric-dialog-canvas {
   max-width: 90vw;
+  cursor: auto !important;
+}
+
+.ghpric-dialog-close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  border: none;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
 }

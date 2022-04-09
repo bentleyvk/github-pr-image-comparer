@@ -26,16 +26,14 @@ const onCompareButtonClick = async (file, baseCommitId, endCommitId, organizatio
   renderWrapper.appendChild(renderContainer);
 
   const filePath = file.dataset.tagsearchPath;
-  const oldImage = await getImg(filePath, organization, repo, baseCommitId);
-  const newImage = await getImg(filePath, organization, repo, endCommitId);
+  const oldImage = await getImg(filePath, organization, repo, baseCommitId, "before");
+  const newImage = await getImg(filePath, organization, repo, endCommitId, "after");
   const width = Math.max(oldImage.width, newImage.width);
   const height = Math.max(oldImage.height, newImage.height);
-  const oldImgCanvas = createImgCanvas2(oldImage, width, height, "before", renderContainer);
-  const newImgCanvas = createImgCanvas2(newImage, width, height, "after", renderContainer);
-  renderContainer.appendChild(oldImgCanvas);
-  renderContainer.appendChild(newImgCanvas);
-
-  console.log(oldImgCanvas.width, oldImgCanvas.height);
+  const oldImgCanvas = createImgCanvas(oldImage, width, height);
+  const newImgCanvas = createImgCanvas(newImage, width, height);
+  renderContainer.appendChild(oldImage);
+  renderContainer.appendChild(newImage);
 
   const oldImg = oldImgCanvas.getContext("2d").getImageData(0, 0, oldImgCanvas.width, oldImgCanvas.height);
   const newImg = newImgCanvas.getContext("2d").getImageData(0, 0, newImgCanvas.width, newImgCanvas.height);
@@ -48,11 +46,11 @@ const onCompareButtonClick = async (file, baseCommitId, endCommitId, organizatio
   const diff = diffContext.createImageData(width, height);
   pixelmatch(oldImg.data, newImg.data, diff.data, width, height, { threshold });
   diffContext.putImageData(diff, 0, 0);
-  addDialogToCanvas(diffCanvas, width, height, "diff", renderContainer);
-  renderContainer.appendChild(diffCanvas);
+  const diffImg = renderContainer.appendChild(convertCanvasToImage(diffCanvas, "diff"));
+  addDialogToCanvas(oldImage, newImage, diffImg, renderContainer);
 };
 
-const getImg = async (imgPath, organization, repo, commitId) => {
+const getImg = async (imgPath, organization, repo, commitId, typePostfix) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.setAttribute("crossOrigin", "");
@@ -60,39 +58,91 @@ const getImg = async (imgPath, organization, repo, commitId) => {
       resolve(img);
     };
     img.src = `https://raw.githubusercontent.com/${organization}/${repo}/${commitId}/${imgPath}`;
+    img.classList.add("ghpric-canvas", `ghpric-canvas-${typePostfix}`);
   });
 };
-const createImgCanvas2 = (img, width, height, typePostfix, renderContainer) => {
+const createImgCanvas = (img, width, height) => {
   const imgCanvas = document.createElement("canvas");
   const imgContext = imgCanvas.getContext("2d");
   imgCanvas.width = width;
   imgCanvas.height = height;
-  imgCanvas.classList.add("ghpric-canvas", `ghpric-canvas-${typePostfix}`);
   imgContext.drawImage(img, 0, 0);
-  addDialogToCanvas(imgCanvas, width, height, typePostfix, renderContainer);
   return imgCanvas;
 };
 
-const addDialogToCanvas = (imgCanvas, width, height, typePostfix, renderContainer) => {
-  imgCanvas.onclick = () => {
+const convertCanvasToImage = (canvas, typePostfix) => {
+  let image = new Image();
+  image.src = canvas.toDataURL();
+  image.classList.add("ghpric-canvas", `ghpric-canvas-${typePostfix}`);
+  return image;
+};
+
+const copyImg = (img) => {
+  const newImg = new Image();
+  newImg.src = img.src;
+  newImg.classList.add(...img.classList.toString().split(" "));
+  return newImg;
+};
+const addDialogToCanvas = (oldImage, newImage, diffImg, renderContainer) => {
+  const onImgSelect = (img, previewImg) => (event) => {
+    event.stopPropagation();
+    previewImg.src = img.src;
+    previewImg.classList.remove('ghpric-canvas-before');
+    previewImg.classList.remove('ghpric-canvas-after');
+    previewImg.classList.remove('ghpric-canvas-diff');
+    previewImg.classList.add(...img.classList.toString().split(" "));
+}
+  /**
+   * @param {HTMLImageElement} img 
+   * @returns 
+   */
+  const onclick = (img) => () => {
     const dialog = document.createElement("dialog");
-    dialog.classList.add("ghpric-dialog", `ghpric-dialog-${typePostfix}`);
-    const newCanvas = document.createElement("canvas");
-    newCanvas.width = width;
-    newCanvas.height = height;
-    newCanvas.getContext("2d").drawImage(imgCanvas, 0, 0);
-    newCanvas.classList.add("ghpric-dialog-canvas");
-    dialog.appendChild(newCanvas);
+    dialog.classList.add("ghpric-dialog");
+
+    const dialogContent = document.createElement("div");
+    dialogContent.classList.add("ghpric-dialog-content");
+    dialogContent.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+    dialog.appendChild(dialogContent);
+
+    const imgSelector = document.createElement("div");
+    imgSelector.classList.add("ghpric-img-selector");
+    dialogContent.appendChild(imgSelector);
+
+    const previewImg = copyImg(img);
+    previewImg.classList.add("ghpric-dialog-canvas");
+    dialogContent.appendChild(previewImg);
+
+    const oldImgSelection = imgSelector.appendChild(copyImg(oldImage));
+    oldImgSelection.onclick = onImgSelect(oldImage, previewImg);
+    const newImgSelection = imgSelector.appendChild(copyImg(newImage));
+    newImgSelection.onclick = onImgSelect(newImage, previewImg);
+    const diffImgSelection = imgSelector.appendChild(copyImg(diffImg));
+    diffImgSelection.onclick = onImgSelect(diffImg, previewImg);
+
+    const dialogCloseButton = document.createElement("button");
+    dialogCloseButton.classList.add("ghpric-dialog-close-button");
+    dialogCloseButton.innerHTML = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m14 0-6 6-6-6-2 2 6 6-6 6 2 2 6-6 6 6 2-2-6-6 6-6"></path></svg>`;
+    dialogCloseButton.onclick = () => {
+      dialog.close();
+    };
+    dialogContent.appendChild(dialogCloseButton);
+
     renderContainer.appendChild(dialog);
     dialog.showModal();
 
     dialog.onclick = () => {
-      renderContainer.removeChild(dialog);
+      dialog.close();
     };
     dialog.onclose = () => {
       renderContainer.removeChild(dialog);
     };
   };
+  oldImage.onclick = onclick(oldImage);
+  newImage.onclick = onclick(newImage);
+  diffImg.onclick = onclick(diffImg);
 };
 
 const start = async () => {
