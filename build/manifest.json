@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "description": "Enhanced GitHub PR images comparer that uses pixelmatch",
 
-  "permissions": ["storage", "contextMenus", "activeTab", "alarms", "declarativeContent"],
+  "permissions": ["storage"],
   "host_permissions": ["https://github.com/*", "https://api.github.com/*"],
   "content_scripts": [
     {
