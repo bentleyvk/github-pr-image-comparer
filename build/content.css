@@ -15,15 +15,15 @@
 }
 
 .ghpric-canvas-before {
-  border: 1px solid #cf222e;
+  border: 2px solid #cf222e;
 }
 
 .ghpric-canvas-after {
-  border: 1px solid #2da44e;
+  border: 2px solid #2da44e;
 }
 
 .ghpric-canvas-diff {
-  border: 1px solid #d0d7de;
+  border: 2px solid #d0d7de;
 }
 
 .ghpric-dialog {
@@ -38,6 +38,8 @@
   display: flex;
   flex-direction: column;
   padding: 16px;
+  align-items: center;
+  max-height: 90vh;
 }
 
 .ghpric-img-selector {
@@ -45,16 +47,21 @@
   justify-content: center;
   gap: 16px;
   padding: 0 16px 16px 16px;
+  max-height: 15vh;
 }
 
 .ghpric-img-selector > img {
   max-width: 25%;
   cursor: pointer;
+  object-fit: contain;
 }
 
 .ghpric-dialog-canvas {
+  width: 90vh;
   max-width: 90vw;
   cursor: auto !important;
+  flex-shrink: 1;
+  min-height: 0;
 }
 
 .ghpric-dialog-close-button {

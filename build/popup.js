@@ -1,6 +1,6 @@
 const options = {
   isDefaultView: false,
-  threshold: 0.1,
+  threshold: 0.01,
 };
 const isDefaultViewCheckbox = document.querySelector("#isDefaultView");
 const thresholdInput = document.querySelector("#threshold");
