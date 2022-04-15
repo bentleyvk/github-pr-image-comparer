@@ -159,12 +159,18 @@ const start = async () => {
     return;
   }
 
-  const datasetUrl = document.querySelector(".js-socket-channel.js-updatable-content.js-pull-refresh-on-pjax").dataset
+  let baseCommitId = "";
+  let endCommitId = "";
+  const datasetUrl = document.querySelector(".js-socket-channel.js-updatable-content.js-pull-refresh-on-pjax")?.dataset
     .url;
-  console.log(datasetUrl);
-  const baseCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("base_commit_oid");
-  const endCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("end_commit_oid");
-  console.log(baseCommitId);
+  if (!datasetUrl) {
+    baseCommitId = document.location.href.split("/").pop().split("..")[0];
+    endCommitId = document.location.href.split("/").pop().split("..")[1];
+    endCommitId = endCommitId.slice(0, 41);
+  } else {
+    baseCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("base_commit_oid");
+    endCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("end_commit_oid");
+  }
 
   const pathSplitted = document.location.pathname.split("/");
   const organization = pathSplitted[1];
