@@ -26,12 +26,22 @@
   border: 2px solid #d0d7de;
 }
 
+html:has(.ghpric-dialog) {
+  overflow: hidden;
+}
+
 .ghpric-dialog {
   border: none;
   padding: 0;
   background-color: #f6f8fa;
   box-shadow: 0 9px 46px rgb(0 0 0 / 25%);
   border-radius: 3px;
+  animation: fade-in 400ms ease-out;
+}
+
+.ghpric-dialog::backdrop {
+  animation: fade-in 400ms ease-out;
+  backdrop-filter: blur(5px);
 }
 
 .ghpric-dialog-content {
@@ -75,4 +85,9 @@
   margin: 0;
   padding: 0;
   background-color: transparent;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
