@@ -87,14 +87,14 @@ const addDialogToCanvas = (oldImage, newImage, diffImg, renderContainer) => {
   const onImgSelect = (img, previewImg) => (event) => {
     event.stopPropagation();
     previewImg.src = img.src;
-    previewImg.classList.remove('ghpric-canvas-before');
-    previewImg.classList.remove('ghpric-canvas-after');
-    previewImg.classList.remove('ghpric-canvas-diff');
+    previewImg.classList.remove("ghpric-canvas-before");
+    previewImg.classList.remove("ghpric-canvas-after");
+    previewImg.classList.remove("ghpric-canvas-diff");
     previewImg.classList.add(...img.classList.toString().split(" "));
-}
+  };
   /**
-   * @param {HTMLImageElement} img 
-   * @returns 
+   * @param {HTMLImageElement} img
+   * @returns
    */
   const onclick = (img) => () => {
     const dialog = document.createElement("dialog");
@@ -122,11 +122,22 @@ const addDialogToCanvas = (oldImage, newImage, diffImg, renderContainer) => {
     const diffImgSelection = imgSelector.appendChild(copyImg(diffImg));
     diffImgSelection.onclick = onImgSelect(diffImg, previewImg);
 
+    const closeAnimation = () => {
+      dialog.classList.add("ghpric-dialog-closing");
+      dialog.addEventListener(
+        "animationend",
+        () => {
+          dialog.close();
+        },
+        { once: true }
+      );
+    }
+
     const dialogCloseButton = document.createElement("button");
     dialogCloseButton.classList.add("ghpric-dialog-close-button");
     dialogCloseButton.innerHTML = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m14 0-6 6-6-6-2 2 6 6-6 6 2 2 6-6 6 6 2-2-6-6 6-6"></path></svg>`;
     dialogCloseButton.onclick = () => {
-      dialog.close();
+      closeAnimation();
     };
     dialogContent.appendChild(dialogCloseButton);
 
@@ -134,7 +145,7 @@ const addDialogToCanvas = (oldImage, newImage, diffImg, renderContainer) => {
     dialog.showModal();
 
     dialog.onclick = () => {
-      dialog.close();
+      closeAnimation();
     };
     dialog.onclose = () => {
       renderContainer.removeChild(dialog);
