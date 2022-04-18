@@ -131,7 +131,7 @@ const addDialogToCanvas = (oldImage, newImage, diffImg, renderContainer) => {
         },
         { once: true }
       );
-    }
+    };
 
     const dialogCloseButton = document.createElement("button");
     dialogCloseButton.classList.add("ghpric-dialog-close-button");
@@ -156,32 +156,24 @@ const addDialogToCanvas = (oldImage, newImage, diffImg, renderContainer) => {
   diffImg.onclick = onclick(diffImg);
 };
 
+const imgFilesQuery = ["png", "jpg", "jpeg", "gif", "svg", "bmp"].map(
+  (ext) => `.file[data-file-type='.${ext}'][data-file-deleted='false']`
+);
+
 const start = async () => {
   const extensionOptions = await getExtensionOptions();
-  console.log("options", extensionOptions);
 
   observe();
 
-  console.log(".js-diff-progressive-container", document.querySelectorAll(".js-diff-progressive-container").length);
-  const imgFiles = document.querySelectorAll(".file[data-file-type='.png'][data-file-deleted='false']");
-  console.log("start", imgFiles.length);
+  const imgFiles = document.querySelectorAll(imgFilesQuery);
 
   if (imgFiles.length === 0) {
     return;
   }
 
-  let baseCommitId = "";
-  let endCommitId = "";
-  const datasetUrl = document.querySelector(".js-socket-channel.js-updatable-content.js-pull-refresh-on-pjax")?.dataset
-    .url;
-  if (!datasetUrl) {
-    baseCommitId = document.location.href.split("/").pop().split("..")[0];
-    endCommitId = document.location.href.split("/").pop().split("..")[1];
-    endCommitId = endCommitId.slice(0, 41);
-  } else {
-    baseCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("base_commit_oid");
-    endCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("end_commit_oid");
-  }
+  const datasetUrl = document.querySelector("details-menu.select-menu-modal[src*=sha1]")?.getAttribute("src");
+  const baseCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("sha1");
+  const endCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("sha2");
 
   const pathSplitted = document.location.pathname.split("/");
   const organization = pathSplitted[1];

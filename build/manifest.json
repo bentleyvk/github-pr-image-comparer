@@ -2,7 +2,7 @@
   "manifest_version": 3,
 
   "name": "GitHub PR images comparer",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Enhanced GitHub PR images comparer that uses pixelmatch",
 
   "permissions": ["storage"],
