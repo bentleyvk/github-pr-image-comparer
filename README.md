@@ -19,7 +19,7 @@ If you are like me and don't like to play "Find 5 differences" in your GitHub PR
 
 # Contributing
 
-Run `yarn install` and `yarn build` to build the extension. 
-For better DX, use `yarn build:watch` to watch for changes and rebuild the extension.
+Run `npm install` and `npm run build` to build the extension. 
+For better DX, use `npm run build:watch` to watch for changes and rebuild the extension.
 
 Everything is done in the `build` directory. Go to `chrome://extensions/` and drag'n'drop the `build` folder.
