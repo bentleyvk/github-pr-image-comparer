@@ -10,7 +10,16 @@
 
 <p align="center">Enhanced GitHub PR images comparer that uses <code>pixelmatch</code>.</p>
 
+# About
+
 If you are like me and don't like to play "Find 5 differences" in your GitHub PR images, then this extension is just for you. Because: 
 - It adds additional image comparer to the GitHub PR file preview that shows what pixels changed so you can easily spot the difference.
 - You can open original, changed and diff images in a preview dialog for better comparison.
 - There is also settings menu that allows you to make this comparer as a default one and change the threshold.
+
+# Contributing
+
+Run `yarn install` and `yarn build` to build the extension. 
+For better DX, use `yarn build:watch` to watch for changes and rebuild the extension.
+
+Everything is done in the `build` directory. Go to `chrome://extensions/` and drag'n'drop the `build` folder.
