@@ -165,6 +165,11 @@ const start = async () => {
 
   observe();
 
+  // If repo is private, do nothing as we don't know how to handle private repos
+  if (document.querySelector('#repository-container-header .octicon-lock')) {
+    return;
+  }
+
   const imgFiles = document.querySelectorAll(imgFilesQuery);
 
   if (imgFiles.length === 0) {
