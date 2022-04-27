@@ -166,7 +166,7 @@ const start = async () => {
   observe();
 
   // If repo is private, do nothing as we don't know how to handle private repos
-  if (document.querySelector('#repository-container-header .octicon-lock')) {
+  if (document.querySelector("#repository-container-header .octicon-lock")) {
     return;
   }
 
@@ -184,7 +184,7 @@ const start = async () => {
   const organization = pathSplitted[1];
   const repo = pathSplitted[2];
 
-  imgFiles.forEach((file) => {
+  const handleFile = (file) => {
     if (!file.querySelector('.diffstat[aria-label="Binary file modified"]') || file.querySelector(".img-comparer")) {
       return;
     }
@@ -212,7 +212,20 @@ const start = async () => {
       imgComparerButton.ariaCurrent = "true";
       onCompareButtonClick(file, baseCommitId, endCommitId, organization, repo, extensionOptions.threshold);
     }
-  });
+  };
+
+  const intersectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          handleFile(entry.target);
+          intersectionObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { rootMargin: "300px" }
+  );
+  imgFiles.forEach((file) => intersectionObserver.observe(file));
 };
 
 start();
