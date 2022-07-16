@@ -12,6 +12,11 @@
       "matches": ["https://github.com/*", "https://gist.github.com/*"],
       "js": ["content.js"],
       "css": ["content.css"]
+    },
+    {
+      "matches": ["https://viewscreen.githubusercontent.com/*"],
+      "js": ["token-extractor.js"],
+      "all_frames": true
     }
   ],
   "action": {
