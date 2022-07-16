@@ -15,10 +15,30 @@ const observe = () => {
 
 const getExtensionOptions = async () => {
   const options = await window.chrome.storage.sync.get("options");
-  return options.options;
+  return (
+    options.options ?? {
+      isDefaultView: false,
+      threshold: 0.01,
+    }
+  );
 };
 
-const onCompareButtonClick = async (file, baseCommitId, endCommitId, organization, repo, threshold) => {
+let isPrivateRepo = false;
+const imgUrls = {};
+
+window.onmessage = (event) => {
+  if (event.origin != "https://viewscreen.githubusercontent.com") {
+    return;
+  }
+  if (event.data?.type !== "iframe-loaded") {
+    return;
+  }
+
+  const src = event.data.src;
+  imgUrls[src.split("?")[0]] = src;
+};
+
+const onCompareButtonClick = async (file, baseCommitId, endCommitId, organization, repo, threshold, token) => {
   const renderWrapper = file.querySelector(".render-wrapper");
   renderWrapper.innerHTML = "";
   const renderContainer = document.createElement("div");
@@ -50,6 +70,9 @@ const onCompareButtonClick = async (file, baseCommitId, endCommitId, organizatio
   addDialogToCanvas(oldImage, newImage, diffImg, renderContainer);
 };
 
+const getImgUrl = (imgPath, organization, repo, commitId) =>
+  `https://raw.githubusercontent.com/${organization}/${repo}/${commitId}/${imgPath}`;
+
 const getImg = async (imgPath, organization, repo, commitId, typePostfix) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -57,7 +80,8 @@ const getImg = async (imgPath, organization, repo, commitId, typePostfix) => {
     img.onload = () => {
       resolve(img);
     };
-    img.src = `https://raw.githubusercontent.com/${organization}/${repo}/${commitId}/${imgPath}`;
+    const imgUrl = getImgUrl(imgPath, organization, repo, commitId);
+    img.src = isPrivateRepo ? imgUrls[imgUrl] : imgUrl;
     img.classList.add("ghpric-canvas", `ghpric-canvas-${typePostfix}`);
   });
 };
@@ -160,21 +184,30 @@ const imgFilesQuery = ["png", "jpg", "jpeg", "gif", "svg", "bmp"].map(
   (ext) => `.file[data-file-type='.${ext}'][data-file-deleted='false']`
 );
 
+const waitUntilUrlIsLoaded = async (url) => {
+  return new Promise(async (resolve, reject) => {
+    if (!imgUrls[url]) {
+      setTimeout(() => {
+        waitUntilUrlIsLoaded(url).then(resolve);
+      }, 500);
+      return;
+    }
+    resolve(imgUrls[url]);
+  });
+};
+
 const start = async () => {
   const extensionOptions = await getExtensionOptions();
 
   observe();
-
-  // If repo is private, do nothing as we don't know how to handle private repos
-  if (document.querySelector("#repository-container-header .octicon-lock")) {
-    return;
-  }
 
   const imgFiles = document.querySelectorAll(imgFilesQuery);
 
   if (imgFiles.length === 0) {
     return;
   }
+
+  isPrivateRepo = !!document.querySelector("#repository-container-header .octicon-lock");
 
   const datasetUrl = document.querySelector("details-menu.select-menu-modal[src*=sha1]")?.getAttribute("src");
   const baseCommitId = new URLSearchParams(datasetUrl.split("?")[1]).get("sha1");
@@ -184,9 +217,15 @@ const start = async () => {
   const organization = pathSplitted[1];
   const repo = pathSplitted[2];
 
-  const handleFile = (file) => {
+  const handleFile = async (file) => {
     if (!file.querySelector('.diffstat[aria-label="Binary file modified"]') || file.querySelector(".img-comparer")) {
       return;
+    }
+
+    // Wait until we have images URLs with token inside iframe
+    if (isPrivateRepo) {
+      await waitUntilUrlIsLoaded(getImgUrl(file.dataset.tagsearchPath, organization, repo, baseCommitId));
+      await waitUntilUrlIsLoaded(getImgUrl(file.dataset.tagsearchPath, organization, repo, endCommitId));
     }
 
     const buttonGroup = file.querySelector(".BtnGroup");
@@ -230,4 +269,3 @@ const start = async () => {
 
 start();
 observe();
-// document.addEventListener('loadend', start);
