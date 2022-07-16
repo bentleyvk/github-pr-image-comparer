@@ -72,7 +72,6 @@ html:has(.ghpric-dialog) {
 }
 
 .ghpric-dialog-canvas {
-  width: 90vh;
   max-width: 90vw;
   cursor: auto !important;
   flex-shrink: 1;
