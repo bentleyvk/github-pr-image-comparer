@@ -6,11 +6,11 @@ const observe = () => {
   const pjaxContainer = document.querySelector("[data-pjax-container]");
   const pjaxContentContainer = document.querySelector("#repo-content-pjax-container");
   observer = new MutationObserver(start);
-  pjaxContainer && observer.observe(pjaxContainer, { childList: true });
-  pjaxContentContainer && observer.observe(pjaxContentContainer, { childList: true });
+  pjaxContainer && observer.observe(pjaxContainer, { childList: true, subtree: true });
+  pjaxContentContainer && observer.observe(pjaxContentContainer, { childList: true, subtree: true });
   document
     .querySelectorAll(".js-diff-progressive-container")
-    .forEach((el) => observer.observe(el, { childList: true }));
+    .forEach((el) => observer.observe(el, { childList: true, subtree: true }));
 };
 
 const getExtensionOptions = async () => {
