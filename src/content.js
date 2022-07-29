@@ -35,7 +35,12 @@ window.onmessage = (event) => {
   }
 
   const src = event.data.src;
-  imgUrls[src.split("?")[0]] = src;
+  const url = src.split("?")[0];
+  imgUrls[url] = src;
+
+  const filePath = url.split("/").slice(6)[0];
+  const iframe = document.querySelector(`iframe[src*="${filePath}"]`);
+  iframe.contentWindow.postMessage({ type: "src-delivered" }, "https://viewscreen.githubusercontent.com");
 };
 
 const onCompareButtonClick = async (file, baseCommitId, endCommitId, organization, repo, threshold, token) => {
@@ -196,6 +201,8 @@ const waitUntilUrlIsLoaded = async (url) => {
   });
 };
 
+const handledFiles = {};
+
 const start = async () => {
   const extensionOptions = await getExtensionOptions();
 
@@ -218,9 +225,15 @@ const start = async () => {
   const repo = pathSplitted[2];
 
   const handleFile = async (file) => {
-    if (!file.querySelector('.diffstat[aria-label="Binary file modified"]') || file.querySelector(".img-comparer")) {
+    if (
+      !file.querySelector('.diffstat[aria-label="Binary file modified"]') ||
+      file.querySelector(".img-comparer") ||
+      handledFiles[file.dataset.tagsearchPath]
+    ) {
       return;
     }
+
+    handledFiles[file.dataset.tagsearchPath] = true;
 
     // Wait until we have images URLs with token inside iframe
     if (isPrivateRepo) {

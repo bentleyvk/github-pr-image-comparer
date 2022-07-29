@@ -5,7 +5,23 @@ async function extractSrc(img) {
   if (!src || sent.has(src)) {
     return;
   }
-  window.top.postMessage({ type: "iframe-loaded", src }, "*");
+
+  // Send image src with token until we get a response that it was delivered.
+  const intervalId = setInterval(() => {
+    window.top.postMessage({ type: "iframe-loaded", src }, "https://github.com");
+    console.log("post", src);
+  }, 100);
+
+  window.onmessage = (event) => {
+    if (event.origin != "https://github.com") {
+      return;
+    }
+    if (event.data?.type !== "src-delivered") {
+      return;
+    }
+    clearInterval(intervalId);
+  };
+
   sent.add(src);
 }
 
