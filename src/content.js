@@ -3,14 +3,15 @@ import pixelmatch from "pixelmatch";
 let observer;
 const observe = () => {
   observer && observer.disconnect();
-  const pjaxContainer = document.querySelector("[data-pjax-container]");
-  const pjaxContentContainer = document.querySelector("#repo-content-pjax-container");
+  // const pjaxContainer = document.querySelector("[data-pjax-container]");
+  // const pjaxContentContainer = document.querySelector("#repo-content-pjax-container");
   observer = new MutationObserver(start);
-  pjaxContainer && observer.observe(pjaxContainer, { childList: true, subtree: true });
-  pjaxContentContainer && observer.observe(pjaxContentContainer, { childList: true, subtree: true });
+  // pjaxContainer && observer.observe(pjaxContainer, { childList: true, subtree: true });
+  // pjaxContentContainer && observer.observe(pjaxContentContainer, { childList: true, subtree: true });
   document
     .querySelectorAll(".js-diff-progressive-container")
     .forEach((el) => observer.observe(el, { childList: true, subtree: true }));
+  observer.observe(document.body, { childList: true, subtree: true });
 };
 
 const getExtensionOptions = async () => {
@@ -40,7 +41,7 @@ window.onmessage = (event) => {
 
   const filePath = url.split("/").slice(6)[0];
   const iframe = document.querySelector(`iframe[src*="${filePath}"]`);
-  iframe.contentWindow.postMessage({ type: "src-delivered" }, "https://viewscreen.githubusercontent.com");
+  iframe?.contentWindow?.postMessage({ type: "src-delivered", src }, "https://viewscreen.githubusercontent.com");
 };
 
 const onCompareButtonClick = async (file, baseCommitId, endCommitId, organization, repo, threshold, token) => {
@@ -201,8 +202,6 @@ const waitUntilUrlIsLoaded = async (url) => {
   });
 };
 
-const handledFiles = {};
-
 const start = async () => {
   const extensionOptions = await getExtensionOptions();
 
@@ -227,19 +226,11 @@ const start = async () => {
   const handleFile = async (file) => {
     if (
       !file.querySelector('.diffstat[aria-label="Binary file modified"]') ||
-      file.querySelector(".img-comparer") ||
-      handledFiles[file.dataset.tagsearchPath]
+      file.querySelector(".img-comparer")
     ) {
       return;
     }
 
-    handledFiles[file.dataset.tagsearchPath] = true;
-
-    // Wait until we have images URLs with token inside iframe
-    if (isPrivateRepo) {
-      await waitUntilUrlIsLoaded(getImgUrl(file.dataset.tagsearchPath, organization, repo, baseCommitId));
-      await waitUntilUrlIsLoaded(getImgUrl(file.dataset.tagsearchPath, organization, repo, endCommitId));
-    }
 
     const buttonGroup = file.querySelector(".BtnGroup");
     const comparerButton = document.createElement("div");
@@ -248,17 +239,25 @@ const start = async () => {
     comparerButton.innerHTML = `<button class="img-comparer btn btn-sm BtnGroup-item tooltipped tooltipped-w rendered js-rendered" aria-label="Display image diff with Pixelmatch" data-disable-with="" aria-current="false">
   <svg class="octicon octicon-file" style="width: 16px; height: 16px;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M426.666667 128H213.333333c-47.146667 0-85.333333 38.186667-85.333333 85.333333v597.333334c0 47.146667 38.186667 85.333333 85.333333 85.333333h213.333334v85.333333h85.333333V42.666667h-85.333333v85.333333z m0 640H213.333333l213.333334-256v256zM810.666667 128H597.333333v85.333333h213.333334v554.666667L597.333333 512v384h213.333334c47.146667 0 85.333333-38.186667 85.333333-85.333333V213.333333c0-47.146667-38.186667-85.333333-85.333333-85.333333z"  /></svg>
   </button>`;
+    buttonGroup.appendChild(comparerButton);
+
+    // Wait until we have images URLs with token inside iframe
+    if (isPrivateRepo) {
+      await waitUntilUrlIsLoaded(getImgUrl(file.dataset.tagsearchPath, organization, repo, baseCommitId));
+      await waitUntilUrlIsLoaded(getImgUrl(file.dataset.tagsearchPath, organization, repo, endCommitId));
+    }
 
     comparerButton.addEventListener("click", () =>
       onCompareButtonClick(file, baseCommitId, endCommitId, organization, repo, extensionOptions.threshold)
     );
 
-    buttonGroup.appendChild(comparerButton);
-
     if (extensionOptions.isDefaultView) {
       const activeViewButton = buttonGroup.querySelector(".selected");
-      activeViewButton.classList.remove("selected");
-      activeViewButton.ariaCurrent = "false";
+      // Sometimes GitHub fails to apply selected class to the button
+      if (activeViewButton) {
+        activeViewButton.classList.remove("selected");
+        activeViewButton.ariaCurrent = "false";
+      }
       const imgComparerButton = buttonGroup.querySelector(".img-comparer");
       imgComparerButton.classList.add("selected");
       imgComparerButton.ariaCurrent = "true";

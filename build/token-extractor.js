@@ -1,8 +1,8 @@
-const sent = new Set();
+const sent = {};
 
 async function extractSrc(img) {
   const src = img.src;
-  if (!src || sent.has(src)) {
+  if (!src || sent[src]) {
     return;
   }
 
@@ -12,18 +12,18 @@ async function extractSrc(img) {
     console.log("post", src);
   }, 100);
 
-  window.onmessage = (event) => {
-    if (event.origin != "https://github.com") {
-      return;
-    }
-    if (event.data?.type !== "src-delivered") {
-      return;
-    }
-    clearInterval(intervalId);
-  };
-
-  sent.add(src);
+  sent[src] = intervalId;
 }
+
+window.onmessage = (event) => {
+  if (event.origin != "https://github.com") {
+    return;
+  }
+  if (event.data?.type !== "src-delivered") {
+    return;
+  }
+  clearInterval(sent[event.data.src]);
+};
 
 const observer = new MutationObserver(() => {
   document.querySelectorAll("img").forEach(extractSrc);
